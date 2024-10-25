@@ -1,0 +1,5 @@
+python "C:\cmd\VBA\part1.py"
+python "C:\cmd\VBA\part2.py"
+python "C:\cmd\VBA\part3.py"
+python "C:\cmd\VBA\part4.py"
+python "C:\cmd\VBA\part5.py"

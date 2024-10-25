@@ -1,0 +1,1 @@
+python "C:\cmd\SSRS(UMK)\UpdateBD.py"
