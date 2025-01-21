@@ -1,5 +1,4 @@
 import logging
-import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -18,17 +17,16 @@ chrome_options = Options()
 chrome_options.add_argument("--headless")  # Run in headless mode
 chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
 chrome_options.add_argument("--no-sandbox")  # Disable sandboxing (recommended for headless)
-chrome_options.add_argument("--disable-software-rasterizer")  # Disable software rasterizer (forces GPU off)
 chrome_options.add_argument("--window-size=1920x1080")  # Optional: Set a specific window size
 
 driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
 
-def log_checkbox_state(checkbox):
-    # Log checkbox attributes
-    checkbox_attributes = driver.execute_script(
+def log_element_attributes(element, element_description="Element"):
+    # Log element attributes
+    element_attributes = driver.execute_script(
         'var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;',
-        checkbox)
-    logging.info("Checkbox attributes: %s", checkbox_attributes)
+        element)
+    logging.info("%s attributes: %s", element_description, element_attributes)
 
 def process_page(url, checkbox_xpath, button_xpath):
     try:
@@ -39,45 +37,22 @@ def process_page(url, checkbox_xpath, button_xpath):
         logging.info("Navigating to URL: %s", url_with_auth)
         driver.get(url_with_auth)
 
-        # Wait for the checkbox to be clickable
+        # Wait for the checkbox to be clickable and log its state
         logging.info("Waiting for checkbox to be clickable")
         checkbox = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, checkbox_xpath)))
-        logging.info("Checkbox found")
+        log_element_attributes(checkbox, "Checkbox")
 
-        # Log the initial state of the checkbox
-        log_checkbox_state(checkbox)
-        checkbox_selected_initial = checkbox.get_attribute("checked")
-        logging.info("Initial checkbox state: %s", checkbox_selected_initial)
-
-        # Take a screenshot before clicking the checkbox
-        # driver.save_screenshot(f"before_click_{url.split('/')[-1]}.png")
-
-        # Check the checkbox if it's not already checked
-        if not checkbox_selected_initial:
+        # Click the checkbox if it's not already selected
+        if not checkbox.is_selected():
             logging.info("Checkbox not selected, clicking to select")
-            driver.execute_script("arguments[0].click();", checkbox)
+            checkbox.click()
             time.sleep(2)  # Small delay to ensure the click is registered
-
-        # Take a screenshot after clicking the checkbox
-        # driver.save_screenshot(f"after_click_{url.split('/')[-1]}.png")
-
-        # Verify the checkbox state by checking the 'checked' attribute
-        log_checkbox_state(checkbox)
-        checkbox_selected_final = checkbox.get_attribute("checked")
-        logging.info("Final checkbox state: %s", checkbox_selected_final)
-
-        if checkbox_selected_final:
-            logging.info("Checkbox selected successfully")
-        else:
-            logging.error("Checkbox was not selected successfully")
+            log_element_attributes(checkbox, "Checkbox after click")
 
         # Find and click the button
         logging.info("Waiting for button to be clickable")
         button = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, button_xpath)))
-        logging.info("Button found, clicking button")
         button.click()
-
-        # Log button click
         logging.info("Button clicked successfully")
 
     except NoSuchElementException as e:
@@ -92,16 +67,9 @@ def process_page(url, checkbox_xpath, button_xpath):
         with open(f"page_source_{url.split('/')[-1]}.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
 
-# Process the second page (Availability)
+# Process the Availability page
 process_page(
     "102.221.36.221/Reports/manage/catalogitem/subscriptions/4AM/Data%20Dumps/Availability%20per%20Day/UMK%20Availability%20Per%20Day",
-    "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[2]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[2]/label[1]/span[1]",
-    "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[1]/ul[1]/li[4]/fieldset[1]/ng-transclude[1]/a[1]/span[2]"
-)
-
-# Process the first page (Breakdown)
-process_page(
-    "102.221.36.221/Reports/manage/catalogitem/subscriptions/4AM/Data%20Dumps/BD%20Dash/UMK%20Breakdown%20Dash",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[2]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[2]/label[1]/span[1]",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[1]/ul[1]/li[4]/fieldset[1]/ng-transclude[1]/a[1]/span[2]"
 )

@@ -8,7 +8,7 @@ def create_email():
     # Open Excel workbook and worksheet
     xl_app = win32.Dispatch("Excel.Application")
     wb = xl_app.Workbooks.Open(r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Eben - Frik\Report Builds.xlsm")
-    ws = wb.Worksheets("KMR")
+    ws = wb.Worksheets("Dirk")
     
     try:
         # Read recipients and subject from Excel
@@ -26,18 +26,14 @@ def create_email():
         html_body = (
             "<p>Good day<br><br>"
             "Find attached the <strong>KMR Crushing Report</strong><br><br>"
-            #"Concat Systems<br><br>"
-            '<img src="C:\\Dropbox\\Intellicode Production Reports\\Crushing.jpg">'
+            "Concat Systems<br><br>"
+            '<img src="C:\Dropbox\Intellicode Production Reports\CONCAT logo.jpg">'
         )
         mail_item.HTMLBody = html_body
         
-        # Attach the latest PDF file
-        pdf_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Eben - Frik\Report PDF's\2025"
-        pdf_files = [f for f in os.listdir(pdf_folder) if f.endswith('.pdf')]
-        if pdf_files:
-            latest_pdf = max(pdf_files, key=lambda x: os.path.getmtime(os.path.join(pdf_folder, x)))
-            pdf_path = os.path.join(pdf_folder, latest_pdf)
-            mail_item.Attachments.Add(pdf_path)
+        # Attach the latest Excel file
+        xl_file = r"C:\Users\EbenOlivier\Desktop\Jan 2025 KMR CRUSHING REPORT - Concat.xlsm"
+        mail_item.Attachments.Add(xl_file)
         
         # Display the email
         mail_item.Display()

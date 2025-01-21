@@ -26,8 +26,8 @@ def create_email():
         html_body = (
             "<p>Good day<br><br>"
             "Find attached the <strong>KMR Crushing Report</strong><br><br>"
-            #"Concat Systems<br><br>"
-            '<img src="C:\\Dropbox\\Intellicode Production Reports\\Crushing.jpg">'
+            "Concat Systems<br><br>"
+            '<img src="C:\Dropbox\Intellicode Production Reports\CONCAT logo.jpg">'
         )
         mail_item.HTMLBody = html_body
         

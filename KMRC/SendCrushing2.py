@@ -26,13 +26,13 @@ def create_email():
         html_body = (
             "<p>Good day<br><br>"
             "Find attached the <strong>KMR Crushing Report</strong><br><br>"
-            "Concat Systems<br><br>"
-            '<img src="C:\\Dropbox\\Intellicode Production Reports\\CONCAT logo.jpg">'
+            #"Concat Systems<br><br>"
+            '<img src="C:\\Dropbox\\Intellicode Production Reports\\Crushing.jpg">'
         )
         mail_item.HTMLBody = html_body
         
         # Attach the latest Excel file
-        xl_file = r"C:\Users\EbenOlivier\Desktop\Oct 2024 KMR CRUSHING REPORT.xlsm"
+        xl_file = r"C:\Users\EbenOlivier\Desktop\Jan 2025 KMR CRUSHING REPORT.xlsm"
         mail_item.Attachments.Add(xl_file)
         
         # Display the email

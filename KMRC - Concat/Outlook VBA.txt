@@ -1,0 +1,198 @@
+Private WithEvents myInboxItems As Outlook.Items
+Private WithEvents myReportFolderItems As Outlook.Items
+
+Private Sub Application_Startup()
+    Dim ns As Outlook.NameSpace
+    Dim reportFolder As Outlook.Folder
+
+    Set ns = Outlook.Application.Session
+    ' Set up event handler for the Inbox
+    Set myInboxItems = ns.GetDefaultFolder(olFolderInbox).Items
+    ' Set up event handler for the "Reports" subfolder of the Inbox
+    Set reportFolder = ns.GetDefaultFolder(olFolderInbox).Folders("Reports")
+    Set myReportFolderItems = reportFolder.Items
+End Sub
+
+Private Sub HandleNewItem(ByVal Item As Object)
+    On Error Resume Next
+    Dim mailItem As Outlook.mailItem
+    Dim subjectToCheck As String
+    Dim bodyToCheck As String
+    Dim batchFilePath As String
+    Dim attachment As Outlook.attachment
+    Dim saveFolder As String
+    Dim filePath As String
+    Dim thankYouPos As Long
+    Dim yorkPos As Long
+    Dim hotazelPos As Long
+
+    If TypeOf Item Is Outlook.mailItem Then
+        Set mailItem = Item
+        ' Convert subject to lowercase for case-insensitive comparison
+        subjectToCheck = LCase(mailItem.Subject)
+        
+        ' Check the format and get the body text accordingly
+        Select Case mailItem.BodyFormat
+            Case olFormatPlain, olFormatUnspecified
+                bodyToCheck = LCase(mailItem.Body)
+            Case olFormatHTML
+                bodyToCheck = LCase(mailItem.HTMLBody)
+            Case olFormatRichText
+                bodyToCheck = LCase(mailItem.Body) ' This will still get the text, but formatting might be off
+        End Select
+        
+        ' Debug logging
+        Debug.Print "Subject: " & subjectToCheck
+        Debug.Print "Body: " & bodyToCheck
+
+        ' Check if the email is in the "Reports" subfolder
+        If mailItem.Parent.Name = "Reports" Then
+            saveFolder = "C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Reporting\Data2(Speed up OneDrive)"
+            For Each attachment In mailItem.Attachments
+                filePath = saveFolder & "\" & attachment.FileName
+                ' Check if the file exists and delete it if it does
+                If Dir(filePath) <> "" Then
+                    Kill filePath
+                End If
+                ' Save the attachment
+                attachment.SaveAsFile filePath
+            Next attachment
+            
+            ' Continue to evaluate the subject line in the "Reports" subfolder
+            Select Case subjectToCheck
+                Case LCase("KMRC Hours")
+                    batchFilePath = "C:\cmd\SSRS(KMRC)\UpdateKMRC.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbHide
+                'Case LCase("Breakdown Dash KMRC") 'Avail per Day KMRC
+                    'batchFilePath = "C:\Users\EbenOlivier\Desktop\VBA2Py.py"
+                    'Shell "cmd.exe /k """"" & batchFilePath & """""", vbHide
+                Case LCase("Daily Reports Tawana")
+                    batchFilePath = "C:\cmd\TAWANA\TAWANARun.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                Case LCase("Update KMRC")
+                    batchFilePath = "C:\cmd\KMRC\KMRCRun.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                'Case LCase("Daily Input")
+                    batchFilePath = "C:\cmd\SSRS(UMK)\UpdateUMK.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                'Case LCase("RE: KMR Equipment Hours")
+                    'batchFilePath = "C:\cmd\SSRS(York + HOT)\Update York + HOT.bat"
+                    'Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                Case Else
+                    ' Exit if no matching subject
+                    Exit Sub
+            End Select
+            
+            ' Find the positions of "thank you", "york", and "hotazel" in the body text
+            thankYouPos = InStr(bodyToCheck, "thank you")
+            yorkPos = InStr(bodyToCheck, "york")
+            hotazelPos = InStr(bodyToCheck, "hotazel")
+
+            ' Determine which term appears first and take action accordingly
+            If (yorkPos > 0 Or hotazelPos > 0) And (thankYouPos = 0 Or ((yorkPos > 0 And yorkPos < thankYouPos) Or (hotazelPos > 0 And hotazelPos < thankYouPos))) Then
+                ' Either york or hotazel appears before thank you or no "thank you" found
+                If yorkPos > 0 And hotazelPos > 0 Then
+                    ' Both "york" and "hotazel" are found, decide based on which appears first
+                    If hotazelPos < yorkPos Then
+                        Debug.Print "Hotazel found first in body."
+                        batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateHOT.bat"
+                    Else
+                        Debug.Print "York found first in body."
+                        batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateYork.bat"
+                    End If
+                ElseIf hotazelPos > 0 Then
+                    Debug.Print "Hotazel found in body."
+                    batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateHOT.bat"
+                ElseIf yorkPos > 0 Then
+                    Debug.Print "York found in body."
+                    batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateYork.bat"
+                End If
+                
+                ' Execute the corresponding batch file
+                Shell "cmd.exe /k """ & batchFilePath & """", vbNormalFocus
+                
+            ElseIf thankYouPos > 0 Then
+                ' "Thank you" is found first, ignore "york" and "hotazel"
+                Debug.Print "'Thank you' found first in body, ignoring other conditions."
+                Exit Sub
+            Else
+                ' Neither "york" nor "hotazel" nor "thank you" found
+                Debug.Print "Neither York, Hotazel, nor Thank you found in body."
+                Exit Sub
+            End If
+            
+        Else
+            ' Handle emails in other folders (not "Reports")
+            Select Case subjectToCheck
+                Case LCase("KMRC Hours")
+                    batchFilePath = "C:\cmd\SSRS(KMRC)\UpdateKMRC.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbHide
+                'Case LCase("Breakdown Dash KMRC") 'Avail per Day KMRC
+                    'batchFilePath = "C:\Users\EbenOlivier\Desktop\VBA2Py.py"
+                    'Shell "cmd.exe /k """"" & batchFilePath & """""", vbHide
+                Case LCase("Daily Reports Tawana")
+                    batchFilePath = "C:\cmd\TAWANA\TAWANARun.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                Case LCase("Update KMRC")
+                    batchFilePath = "C:\cmd\KMRC\KMRCRun.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                'Case LCase("Daily Input")
+                    batchFilePath = "C:\cmd\SSRS(UMK)\UpdateUMK.bat"
+                    Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                'Case LCase("RE: KMR Equipment Hours")
+                    'batchFilePath = "C:\cmd\SSRS(York + HOT)\Update York + HOT.bat"
+                    'Shell "cmd.exe /k """"" & batchFilePath & """""", vbNormalFocus
+                Case Else
+                    ' Exit if no matching subject
+                    Exit Sub
+            End Select
+            
+            ' Find the positions of "thank you", "york", and "hotazel" in the body text
+            thankYouPos = InStr(bodyToCheck, "thank you")
+            yorkPos = InStr(bodyToCheck, "york")
+            hotazelPos = InStr(bodyToCheck, "hotazel")
+
+            ' Determine which term appears first and take action accordingly
+            If (yorkPos > 0 Or hotazelPos > 0) And (thankYouPos = 0 Or ((yorkPos > 0 And yorkPos < thankYouPos) Or (hotazelPos > 0 And hotazelPos < thankYouPos))) Then
+                ' Either york or hotazel appears before thank you or no "thank you" found
+                If yorkPos > 0 And hotazelPos > 0 Then
+                    ' Both "york" and "hotazel" are found, decide based on which appears first
+                    If hotazelPos < yorkPos Then
+                        Debug.Print "Hotazel found first in body."
+                        batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateHOT.bat"
+                    Else
+                        Debug.Print "York found first in body."
+                        batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateYork.bat"
+                    End If
+                ElseIf hotazelPos > 0 Then
+                    Debug.Print "Hotazel found in body."
+                    batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateHOT.bat"
+                ElseIf yorkPos > 0 Then
+                    Debug.Print "York found in body."
+                    batchFilePath = "C:\cmd\SSRS(York + HOT)\UpdateYork.bat"
+                End If
+                
+                ' Execute the corresponding batch file
+                Shell "cmd.exe /k """ & batchFilePath & """", vbNormalFocus
+                
+            ElseIf thankYouPos > 0 Then
+                ' "Thank you" is found first, ignore "york" and "hotazel"
+                Debug.Print "'Thank you' found first in body, ignoring other conditions."
+                Exit Sub
+            Else
+                ' Neither "york" nor "hotazel" nor "thank you" found
+                Debug.Print "Neither York, Hotazel, nor Thank you found in body."
+                Exit Sub
+            End If
+        End If
+    End If
+End Sub
+
+Private Sub myInboxItems_ItemAdd(ByVal Item As Object)
+    HandleNewItem Item
+End Sub
+
+Private Sub myReportFolderItems_ItemAdd(ByVal Item As Object)
+    HandleNewItem Item
+End Sub
+

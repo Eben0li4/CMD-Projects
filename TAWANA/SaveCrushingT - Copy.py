@@ -3,8 +3,9 @@ import time
 import datetime
 import win32com.client
 import pythoncom
+from multiprocessing import Process
 
-def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_name, chart_name, desired_plot_by):
+def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_name, chart_name):
     if not os.path.exists(excel_path):
         print(f"Error: The file '{excel_path}' does not exist.")
         return
@@ -18,6 +19,7 @@ def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_na
         calc_sheet = workbook.Sheets(calc_sheet_name)
         chart_sheet = workbook.Sheets(chart_sheet_name)
 
+        # Allow Excel to process pending tasks
         pythoncom.PumpWaitingMessages()
         
         chart = None
@@ -28,23 +30,20 @@ def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_na
 
         if chart is not None:
             print(f"Updating chart '{chart_name}' in sheet '{chart_sheet_name}' to include data up to {today.strftime('%d-%m-%Y')}")
+
             start_row = 44
             if today.day >= 21:
-                day_adjustment = today.day - 22
+                day_Adjustment = today.day - 22
             else:
-                day_adjustment = today.day + 9
-            end_row = start_row + day_adjustment
+                day_Adjustment = today.day + 9
+            end_row = start_row + day_Adjustment
             data_range = calc_sheet.Range(f"C43:I{end_row}")
             chart.SetSourceData(data_range)
-            
-            if chart.PlotBy != desired_plot_by:
-                chart.PlotBy = desired_plot_by
-                print(f"Chart plotting adjusted to {'rows' if desired_plot_by == 1 else 'columns'}.")
-
             print(f"Chart data range updated to: C43:I{end_row}")
         else:
             print(f"Chart '{chart_name}' not found in sheet '{chart_sheet_name}'")
 
+        # Save the workbook with a retry mechanism
         for attempt in range(5):
             try:
                 workbook.Save()
@@ -52,7 +51,7 @@ def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_na
                 break
             except Exception as e:
                 print(f"Attempt {attempt + 1}: Error occurred while saving the workbook: {e}")
-                time.sleep(2)
+                time.sleep(2)  # Wait for 2 seconds before retrying
         else:
             print("Failed to save the workbook after several attempts.")
 
@@ -60,6 +59,7 @@ def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_na
         print(f"An error occurred while updating chart data: {e}")
     
     finally:
+        # Close the workbook with a retry mechanism
         for attempt in range(5):
             try:
                 workbook.Close(False)
@@ -67,7 +67,7 @@ def update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_na
                 break
             except Exception as e:
                 print(f"Attempt {attempt + 1}: Error occurred while closing the workbook: {e}")
-                time.sleep(2)
+                time.sleep(2)  # Wait for 2 seconds before retrying
         else:
             print("Failed to close the workbook after several attempts.")
         
@@ -92,8 +92,9 @@ def save_excel_as_pdf(excel_path, sheet_name, pdf_folder):
     try:
         workbook = excel_app.Workbooks.Open(excel_path)
         sheet = workbook.Sheets(sheet_name)
-        sheet.Activate()
+        sheet.Activate()  # Ensure the sheet is active
         
+        # Allow Excel to process pending tasks
         pythoncom.PumpWaitingMessages()
         
         sheet.ExportAsFixedFormat(0, pdf_path)
@@ -103,6 +104,7 @@ def save_excel_as_pdf(excel_path, sheet_name, pdf_folder):
         print(f"An error occurred while saving the PDF: {e}")
 
     finally:
+        # Close the workbook with a retry mechanism
         for attempt in range(5):
             try:
                 workbook.Close(False)
@@ -110,7 +112,7 @@ def save_excel_as_pdf(excel_path, sheet_name, pdf_folder):
                 break
             except Exception as e:
                 print(f"Attempt {attempt + 1}: Error occurred while closing the workbook: {e}")
-                time.sleep(2)
+                time.sleep(2)  # Wait for 2 seconds before retrying
         else:
             print("Failed to close the workbook after several attempts.")
         
@@ -138,6 +140,7 @@ def find_charts_in_excel(file_path, sheet_name, chart_name):
             print(f"No chart named '{chart_name}' found in sheet: {sheet_name}")
 
     finally:
+        # Close the workbook with a retry mechanism
         for attempt in range(5):
             try:
                 workbook.Close(False)
@@ -145,7 +148,7 @@ def find_charts_in_excel(file_path, sheet_name, chart_name):
                 break
             except Exception as e:
                 print(f"Attempt {attempt + 1}: Error occurred while closing the workbook: {e}")
-                time.sleep(2)
+                time.sleep(2)  # Wait for 2 seconds before retrying
         else:
             print("Failed to close the workbook after several attempts.")
         
@@ -153,16 +156,21 @@ def find_charts_in_excel(file_path, sheet_name, chart_name):
     
     return chart_found
 
-# Define paths and variables
-excel_path = r"C:\Users\EbenOlivier\Desktop\Nov - Dec 2024 TAWANA CRUSHING REPORT.xlsm"
-pdf_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Sebilo Eben\TAWANA DAILY\PDFS"
-chart_sheet_name = 'TAWANA CRUS PROD REPORT'
-calc_sheet_name = 'Calculations'
-chart_name = 'Chart 1'
-desired_plot_by = 2  # Assuming you want columns
+def run_all_tasks():
+    excel_path = r"C:\Users\EbenOlivier\Desktop\Nov - Dec 2024 TAWANA CRUSHING REPORT.xlsm"
+    pdf_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Sebilo Eben\TAWANA DAILY\PDFS"
+    chart_sheet_name = 'TAWANA CRUS PROD REPORT'
+    calc_sheet_name = 'Calculations'
+    chart_name = 'Chart 1'
 
-if find_charts_in_excel(excel_path, chart_sheet_name, chart_name):
-    update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_name, chart_name, desired_plot_by)
-    save_excel_as_pdf(excel_path, chart_sheet_name, pdf_folder)
-else:
-    print("No chart found or updated. PDF will not be created.")
+    if find_charts_in_excel(excel_path, chart_sheet_name, chart_name):
+        update_chart_data_to_latest_date(excel_path, calc_sheet_name, chart_sheet_name, chart_name)
+        save_excel_as_pdf(excel_path, chart_sheet_name, pdf_folder)
+    else:
+        print("No chart found or updated. PDF will not be created.")
+
+if __name__ == "__main__":
+    # Run all tasks in separate process
+    p = Process(target=run_all_tasks)
+    p.start()
+    p.join()

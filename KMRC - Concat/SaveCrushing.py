@@ -105,7 +105,7 @@ def find_charts_in_excel(file_path, sheet_name, chart_name):
     return chart_found
 
 # Define paths
-excel_path = r"C:\Users\EbenOlivier\Desktop\Jan 2025 KMR CRUSHING REPORT.xlsm"
+excel_path = r"C:\Users\EbenOlivier\Desktop\Jan 2025 KMR CRUSHING REPORT - Concat.xlsm"
 pdf_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Eben - Frik\Report PDF's\2025"
 copy_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Eben - Frik"
 chart_sheet_name = 'KMR CRUS PROD REPORT'
