@@ -92,16 +92,14 @@ def process_page(url, checkbox_xpath, button_xpath):
         with open(f"page_source_{url.split('/')[-1]}.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
 
-# Process the first page (Breakdown)
 process_page(
     "102.221.36.221/Reports/manage/catalogitem/subscriptions/4AM/Data%20Dumps/BD%20Dash/KMRC%20Breakdown%20Dash",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[2]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[2]/label[1]/span[1]",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[1]/ul[1]/li[4]/fieldset[1]/ng-transclude[1]/a[1]/span[2]"
 )
 
-# Process the second page (Availability)
 process_page(
-    "102.221.36.221/Reports/manage/catalogitem/subscriptions/4AM/Data%20Dumps/Availability%20per%20Day/KMRC%20Availability%20Per%20Day",
+    "102.221.36.221/Reports/manage/catalogitem/subscriptions/4AM/Data%20Dumps/BD%20Dash/KMRC%20Breakdown%20Dash",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[2]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/div[2]/label[1]/span[1]",
     "/html[1]/body[1]/div[1]/section[2]/div[1]/section[1]/div[1]/section[2]/subscriptions[1]/div[1]/fieldset[1]/ng-transclude[1]/div[1]/ul[1]/li[4]/fieldset[1]/ng-transclude[1]/a[1]/span[2]"
 )

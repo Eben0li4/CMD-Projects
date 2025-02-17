@@ -32,7 +32,7 @@ def create_email():
         mail_item.HTMLBody = html_body
         
         # Attach the latest Excel file
-        xl_file = r"C:\Users\EbenOlivier\Desktop\Jan 2025 KMR CRUSHING REPORT - Concat.xlsm"
+        xl_file = r"C:\Users\EbenOlivier\Desktop\Feb 2025 KMR CRUSHING REPORT - Concat.xlsm"
         mail_item.Attachments.Add(xl_file)
         
         # Display the email

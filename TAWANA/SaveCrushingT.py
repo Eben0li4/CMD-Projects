@@ -154,7 +154,7 @@ def find_charts_in_excel(file_path, sheet_name, chart_name):
     return chart_found
 
 # Define paths and variables
-excel_path = r"C:\Users\EbenOlivier\Desktop\Nov - Dec 2024 TAWANA CRUSHING REPORT.xlsm"
+excel_path = r"C:\Users\EbenOlivier\Desktop\Jan - Feb 2024 TAWANA CRUSHING REPORT.xlsm"
 pdf_folder = r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Sebilo Eben\TAWANA DAILY\PDFS"
 chart_sheet_name = 'TAWANA CRUS PROD REPORT'
 calc_sheet_name = 'Calculations'

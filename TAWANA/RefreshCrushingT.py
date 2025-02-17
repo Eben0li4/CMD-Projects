@@ -34,7 +34,7 @@ def refresh_excel_workbooks(file_paths):
 
 if __name__ == "__main__":
     file_paths = [
-        r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Sebilo Shared Folder\Sebilo\021. Sebilo Onsite Work Folder\15. 4AC REPORTS\03. LOGBOOK\24\12 2024 TAWANA CRUSHING LOGBOOK.xlsx",
-        r"C:\Users\EbenOlivier\Desktop\Nov - Dec 2024 TAWANA CRUSHING REPORT.xlsm"
+        r"C:\Users\EbenOlivier\OneDrive - 4 Arrows Mining\Sebilo Shared Folder\Sebilo\021. Sebilo Onsite Work Folder\15. 4AC REPORTS\03. LOGBOOK\25\02 2025 TAWANA CRUSHING LOGBOOK.xlsx",
+        r"C:\Users\EbenOlivier\Desktop\Jan - Feb 2024 TAWANA CRUSHING REPORT.xlsm"
     ]
     refresh_excel_workbooks(file_paths)
